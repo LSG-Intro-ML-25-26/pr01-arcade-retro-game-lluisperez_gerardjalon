@@ -1,29 +1,11 @@
-def on_down_pressed():
+def on_up_pressed():
     animation.run_image_animation(nena,
         assets.animation("""
-            nena-animation-down
+            nena-animation-up
             """),
         500,
         False)
-controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
-
-def on_right_pressed():
-    animation.run_image_animation(nena,
-        assets.animation("""
-            nena-animation-right
-            """),
-        500,
-        False)
-controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
-
-def on_left_pressed():
-    animation.run_image_animation(nena,
-        assets.animation("""
-            nena-animation-left
-            """),
-        500,
-        False)
-controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
+controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
 
 def on_a_pressed():
     global projectile
@@ -47,18 +29,36 @@ def on_a_pressed():
         pass
 controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
+def on_left_pressed():
+    animation.run_image_animation(nena,
+        assets.animation("""
+            nena-animation-left
+            """),
+        500,
+        False)
+controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
+
 def on_on_zero(status):
     sprites.destroy(enemigo)
 statusbars.on_zero(StatusBarKind.enemy_health, on_on_zero)
 
-def on_up_pressed():
+def on_right_pressed():
     animation.run_image_animation(nena,
         assets.animation("""
-            nena-animation-up
+            nena-animation-right
             """),
         500,
         False)
-controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
+controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
+
+def on_down_pressed():
+    animation.run_image_animation(nena,
+        assets.animation("""
+            nena-animation-down
+            """),
+        500,
+        False)
+controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
 
 def on_on_overlap(sprite, otherSprite):
     statusbar2.value -= 10

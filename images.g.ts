@@ -1,4 +1,4 @@
-// Código generado automáticamente. No editar.
+// Auto-generated code. Do not edit.
 namespace myImages {
 
     helpers._registerFactory("image", function(name: string) {
@@ -78,29 +78,6 @@ f f f c 3 c c c c 3 c f f f
 . 4 4 f f f 1 1 f 2 f 4 4 . 
 . . . . f f f f f f . . . . 
 . . . . f f . . f f . . . . 
-`;
-            case "image5":
-            case "ice":return img`
-...ffffffffff...
-..ffffffffffff..
-.ff111f11f111ff.
-.fff1ff1ff111ff.
-.fff1ff1ff1ffff.
-.ff111f11f111ff.
-.ffffffffffffff.
-..fddd1111dddf..
-..fbdbfddfbdbf..
-..fcd1f11f1dcf..
-.ffff111111bff..
-fcff1cdb1bdfff..
-f1bffcbfbfff11cf
-fbfbfbfffffb1b1f
-....ffffffffbfbf
-.....ffffff.....
-..fffffffffffff.
-.fffbcfffffcbfff
-.fbc111f.f111cbf
-.fffffff.fffffff
 `;
             case "image6":
             case "trump-front0":return img`
@@ -243,6 +220,44 @@ fbfbfbfffffb1b1f
 2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
 2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
 2222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222
+`;
+            case "image5":
+            case "trump-front1":return img`
+. . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . 
+. . . . . . . . . . . . . . 
+. . . f f f f f f f f . . . 
+. . f f f f f f f f f f . . 
+. . f d d d d d d d d f . . 
+. . f d 1 f d d f 1 d f . . 
+. . f f f f f f f f f f . . 
+. f f 1 f f 1 1 f 1 1 f f . 
+f f f 1 f f 1 f f 1 f f f f 
+d d f 1 f f 1 f f 1 1 f d d 
+d d f 1 f f 1 f f 1 f f d d 
+d d f 1 f f 1 1 f 1 1 f d d 
+. . f f f f f f f f f f . . 
+. . . f f f . . f f f . . . 
+`;
+            case "image8":
+            case "trump-front2":return img`
+. . . . f f . f f f f . . . 
+. . f f f 1 f f f f 1 f . . 
+. . f f f f 1 f f 1 f f . . 
+. f f f f f f f f f f f . . 
+. f f d d d d d d d d f . . 
+. . f d b f d d f b d f . . 
+. . f d 1 f d d f 1 d f . . 
+. . f d d d d d d d d f . . 
+. . f d d f f f f d d f . . 
+. . . f d f d d f d f . . . 
+. f 4 4 4 4 4 4 4 4 4 4 f . 
+. f 4 4 5 4 4 4 f f 4 4 f . 
+. d d 4 8 4 4 4 4 4 4 d d . 
+. . . f 2 4 4 4 4 4 f . . . 
+. . . f 4 4 . . 4 4 f . . . 
+. . . f 4 4 . . 4 4 f . . . 
 `;
         }
         return null;
@@ -527,4 +542,4 @@ f f f c 3 c c c c c c f . .
     })
 
 }
-// Código generado automáticamente. No editar.
+// Auto-generated code. Do not edit.

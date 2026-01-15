@@ -1,23 +1,7 @@
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.runImageAnimation(
     nena,
-    assets.animation`nena-animation-down`,
-    500,
-    false
-    )
-})
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    animation.runImageAnimation(
-    nena,
-    assets.animation`nena-animation-right`,
-    500,
-    false
-    )
-})
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    animation.runImageAnimation(
-    nena,
-    assets.animation`nena-animation-left`,
+    assets.animation`nena-animation-up`,
     500,
     false
     )
@@ -35,13 +19,29 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     	
     }
 })
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    animation.runImageAnimation(
+    nena,
+    assets.animation`nena-animation-left`,
+    500,
+    false
+    )
+})
 statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
     sprites.destroy(enemigo)
 })
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.runImageAnimation(
     nena,
-    assets.animation`nena-animation-up`,
+    assets.animation`nena-animation-right`,
+    500,
+    false
+    )
+})
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    animation.runImageAnimation(
+    nena,
+    assets.animation`nena-animation-down`,
     500,
     false
     )
@@ -62,6 +62,7 @@ statusbar.attachToSprite(nena)
 enemigo = sprites.create(assets.image`trump-front`, SpriteKind.Enemy)
 statusbar2 = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
 statusbar2.attachToSprite(enemigo)
+scene.setBackgroundColor(0)
 game.onUpdate(function () {
 	
 })
