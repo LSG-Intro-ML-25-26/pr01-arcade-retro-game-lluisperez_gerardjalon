@@ -35,6 +35,9 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     	
     }
 })
+statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
+    sprites.destroy(enemigo)
+})
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.runImageAnimation(
     nena,
@@ -43,14 +46,22 @@ controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     false
     )
 })
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
+    statusbar2.value -= 10
+pause(500)
+})
 let projectile: Sprite = null
+let enemigo: Sprite = null
 let nena: Sprite = null
+let statusbar2 : StatusBarSprite = null
 nena = sprites.create(assets.image`nena-front`, SpriteKind.Player)
 nena.setStayInScreen(true)
 controller.moveSprite(nena)
 let statusbar = statusbars.create(20, 2, StatusBarKind.Health)
 statusbar.attachToSprite(nena)
-let enemigo = sprites.create(assets.image`trump-front`, SpriteKind.Enemy)
+enemigo = sprites.create(assets.image`trump-front`, SpriteKind.Enemy)
+statusbar2 = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
+statusbar2.attachToSprite(enemigo)
 game.onUpdate(function () {
 	
 })
