@@ -1,7 +1,23 @@
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.runImageAnimation(
     nena,
-    assets.animation`nena-animation-up`,
+    assets.animation`nena-animation-down`,
+    500,
+    false
+    )
+})
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    animation.runImageAnimation(
+    nena,
+    assets.animation`nena-animation-right`,
+    500,
+    false
+    )
+})
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    animation.runImageAnimation(
+    nena,
+    assets.animation`nena-animation-left`,
     500,
     false
     )
@@ -19,29 +35,13 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     	
     }
 })
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    animation.runImageAnimation(
-    nena,
-    assets.animation`nena-animation-left`,
-    500,
-    false
-    )
-})
 statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
     sprites.destroy(enemigo)
 })
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     animation.runImageAnimation(
     nena,
-    assets.animation`nena-animation-right`,
-    500,
-    false
-    )
-})
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    animation.runImageAnimation(
-    nena,
-    assets.animation`nena-animation-down`,
+    assets.animation`nena-animation-up`,
     500,
     false
     )
@@ -64,5 +64,6 @@ statusbar2 = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
 statusbar2.attachToSprite(enemigo)
 scene.setBackgroundColor(0)
 game.onUpdate(function () {
-	
+    let mySprite: Sprite = null
+    mySprite.sayText("test_push")
 })
