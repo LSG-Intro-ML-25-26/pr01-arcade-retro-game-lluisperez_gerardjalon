@@ -1,11 +1,29 @@
-def on_up_pressed():
+def on_down_pressed():
     animation.run_image_animation(nena,
         assets.animation("""
-            nena-animation-up
+            nena-animation-down
             """),
         500,
         False)
-controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
+controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
+
+def on_right_pressed():
+    animation.run_image_animation(nena,
+        assets.animation("""
+            nena-animation-right
+            """),
+        500,
+        False)
+controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
+
+def on_left_pressed():
+    animation.run_image_animation(nena,
+        assets.animation("""
+            nena-animation-left
+            """),
+        500,
+        False)
+controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
 
 def on_a_pressed():
     if characterAnimations.matches_rule(nena, characterAnimations.rule(Predicate.FACING_RIGHT)) or characterAnimations.matches_rule(nena, characterAnimations.rule(Predicate.MOVING_RIGHT)):
@@ -26,15 +44,6 @@ def on_a_pressed():
             """), nena, 0, -150)
 controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
-def on_left_pressed():
-    animation.run_image_animation(nena,
-        assets.animation("""
-            nena-animation-left
-            """),
-        500,
-        False)
-controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
-
 def on_on_zero(vida):
     global enemigo3
     enemigo3 = vida.sprite_attached_to()
@@ -50,15 +59,6 @@ def on_on_overlap(bala, enemigo):
         vida_enemigo.value -= 10
 sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap)
 
-def on_right_pressed():
-    animation.run_image_animation(nena,
-        assets.animation("""
-            nena-animation-right
-            """),
-        500,
-        False)
-controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
-
 def iniciar_nivel_1():
     global nena, vida_jugador
     tiles.set_current_tilemap(tilemap("""
@@ -72,6 +72,16 @@ def iniciar_nivel_1():
     scene.camera_follow_sprite(nena)
     vida_jugador = statusbars.create(20, 2, StatusBarKind.health)
     vida_jugador.attach_to_sprite(nena)
+
+def on_up_pressed():
+    animation.run_image_animation(nena,
+        assets.animation("""
+            nena-animation-up
+            """),
+        500,
+        False)
+controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
+
 def crear_enemigo_tiktok():
     global enemigo2, vida_enemigo2
     enemigo2 = sprites.create(assets.image("""
@@ -82,31 +92,12 @@ def crear_enemigo_tiktok():
     vida_enemigo2.max = 20
     vida_enemigo2.attach_to_sprite(enemigo2)
     enemigo2.follow(nena, 20)
-
-def on_down_pressed():
-    animation.run_image_animation(nena,
-        assets.animation("""
-            nena-animation-down
-            """),
-        500,
-        False)
-controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
-
-def sceneOne():
-    game.show_long_text("Son les 3:33AM i demà tens examen d'Android, portes mirant TIKTOK dos hores",
-        DialogLayout.CENTER)
-    game.show_long_text("Per donar-li like a un més no passarà res...",
-        DialogLayout.CENTER)
-    scene.set_background_image(assets.image("""
-        fondoMovil
-        """))
 vida_enemigo2: StatusBarSprite = None
 enemigo2: Sprite = None
 vida_jugador: StatusBarSprite = None
+vida_enemigo: StatusBarSprite = None
 enemigo3: Sprite = None
 nena: Sprite = None
-vida_enemigo: StatusBarSprite = None
-sceneOne()
 iniciar_nivel_1()
 
 def on_update_interval():
