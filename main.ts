@@ -104,9 +104,9 @@ let corazon: Sprite = null
 let vida_enemigo2: StatusBarSprite = null
 let enemigo2: Sprite = null
 let vida_jugador: StatusBarSprite = null
-let nena: Sprite = null
-let vida_enemigo = null
 let enemigo3 = null
+let vida_enemigo = null
+let nena: Sprite = null
 sceneOne()
 game.onUpdateInterval(4000, function () {
     if (nena) {
