@@ -4,11 +4,18 @@ class SpriteKind:
     cursor = SpriteKind.create()
     vacio = SpriteKind.create()
     Rose = SpriteKind.create()
+
+def on_on_overlap(player2, rose):
+    global rosa_actual
+    rosa_actual = rose
+sprites.on_overlap(SpriteKind.player, SpriteKind.Rose, on_on_overlap)
+
 def sceneStart():
     global Play
     Play = sprites.create(assets.image("""
-        parpadeo
-        """), SpriteKind.vacio)
+            fondo_inicio0
+            """),
+        SpriteKind.vacio)
     while not (controller.A.is_pressed()):
         Play.set_flag(SpriteFlag.INVISIBLE, True)
         pause(200)
@@ -40,6 +47,14 @@ def on_right_pressed():
             500,
             False)
 controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
+
+def on_on_destroyed(enemigo2):
+    if enemigos.index_of(enemigo2) >= 0:
+        j = enemigos.index_of(enemigo2)
+        sprites.destroy(barras_enemigo[j])
+        barras_enemigo.remove_at(j)
+        enemigos.remove_at(j)
+sprites.on_destroyed(SpriteKind.enemy, on_on_destroyed)
 
 def on_left_pressed():
     global ultima_direccion
@@ -74,6 +89,34 @@ def on_a_pressed():
             """), nena, 0, 150)
 controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
+def on_b_pressed():
+    global rosas, rosa_actual
+    if not nena or not rosa_actual:
+        return
+    if not nena.overlaps_with(rosa_actual):
+        rosa_actual = None
+        return
+
+    sprites.destroy(rosa_actual, effects.none, 0)
+    rosa_actual = None
+    rosas += 1
+
+    if rosas == 1:
+        poner_hud(assets.image("""
+            hud_rosas0
+            """))
+    elif rosas == 2:
+        poner_hud(assets.image("""
+            hud_rosas1
+            """))
+    else:
+        poner_hud(assets.image("""
+            hud_rosas2
+            """))
+        abrir_puerta()
+
+controller.B.on_event(ControllerButtonEvent.PRESSED, on_b_pressed)
+
 def scenethree():
     scene.set_background_image(assets.image("""
         fondo_3am1
@@ -81,6 +124,16 @@ def scenethree():
     game.show_long_text("La pantalla s'estira. El soroll canvia. El temps s'atura. Notes el cos pesat. Com si caiguessis… cap endins.",
         DialogLayout.BOTTOM)
     iniciar_nivel_1()
+
+def on_on_overlap2(bala, enemigo):
+    sprites.destroy(bala)
+    if enemigos.index_of(enemigo) >= 0:
+        i = enemigos.index_of(enemigo)
+        barras_enemigo[i].value += -10
+        if barras_enemigo[i].value <= 0:
+            sprites.destroy(enemigo)
+sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap2)
+
 def abrir_puerta():
     tiles.set_tile_at(tiles.get_tile_location(10, 5),
         assets.tile("""
@@ -93,20 +146,28 @@ def scenetwo():
     game.show_long_text("El mòbil vibra. No és una notificació. Intentes bloquejar-lo. El botó no respon. Només un més. Aquesta vegada no ho decideixes tu.",
         DialogLayout.BOTTOM)
     scenethree()
-
-def on_on_overlap(player2, rose):
-    global rosas
-    sprites.destroy(rose)
-    rosas += 1
-    if rosas >= 3:
-        abrir_puerta()
-sprites.on_overlap(SpriteKind.player, SpriteKind.Rose, on_on_overlap)
-
 def iniciar_nivel_1():
-    global nivel, nena, rosa, vida_jugador
+    global nivel, rosas, rosa_actual, nena, vida_jugador
+    music.play(music.create_song(hex("""
+            0078000408020405001c000f0a006400f4010a00000400000000000000000000000000000000021e0000000400021d2a1c0020000220252c003000031e242c34003800031e242c06001c00010a006400f40164000004000000000000000000000000000000000207000c001000021e2507001c00020a006400f40164000004000000000000000000000000000000000313000000040001271000140002242a20002400012a09010e02026400000403780000040a000301000000640001c80000040100000000640001640000040100000000fa0004af00000401c80000040a00019600000414000501006400140005010000002c0104dc00000401fa0000040a0001c8000004140005d0076400140005d0070000c800029001f40105c201f4010a0005900114001400039001000005c201f4010500058403050032000584030000fa00049001000005c201f4010500058403c80032000584030500640005840300009001049001000005c201f4010500058403c80064000584030500c8000584030000f40105ac0d000404a00f00000a0004ac0d2003010004a00f0000280004ac0d9001010004a00f0000280002d00700040408070f0064000408070000c80003c800c8000e7d00c80019000e64000f0032000e78000000fa00032c01c8000ee100c80019000ec8000f0032000edc000000fa0003f401c8000ea901c80019000e90010f0032000ea4010000fa0001c8000004014b000000c800012c01000401c8000000c8000190010004012c010000c80002c800000404c8000f0064000496000000c80002c2010004045e010f006400042c010000640002c409000404c4096400960004f6090000f40102b80b000404b80b64002c0104f40b0000f401022003000004200300040a000420030000ea01029001000004900100040a000490010000900102d007000410d0076400960010d0070000c800360000000100010508000900020407140015000204091c001d00010b20002100020206280029000204083000310001093800390003000409
+            """)),
+        music.PlaybackMode.LOOPING_IN_BACKGROUND)
     nivel = 1
+    rosas = 0
+    rosa_actual = None
     tiles.set_current_tilemap(tilemap("""
         nivel1
+        """))
+    nena = sprites.create(assets.image("""
+        nena-front
+        """), SpriteKind.player)
+    nena.set_position(40, 470)
+    controller.move_sprite(nena, 100, 100)
+    scene.camera_follow_sprite(nena)
+    vida_jugador = statusbars.create(20, 2, StatusBarKind.health)
+    vida_jugador.attach_to_sprite(nena)
+    poner_hud(assets.image("""
+        hud_rosas
         """))
     for index in range(3):
         r = sprites.create(assets.image("""
@@ -115,17 +176,6 @@ def iniciar_nivel_1():
         tiles.place_on_random_tile(r, assets.tile("""
             miMosaico
             """))
-    nena = sprites.create(assets.image("""
-        nena-front
-        """), SpriteKind.player)
-    nena.set_position(40, 470)
-    controller.move_sprite(nena, 100, 100)
-    scene.camera_follow_sprite(nena)
-    rosa = sprites.create(assets.image("""
-        rose
-        """), SpriteKind.Rose)
-    vida_jugador = statusbars.create(20, 2, StatusBarKind.health)
-    vida_jugador.attach_to_sprite(nena)
 
 def on_up_pressed():
     global ultima_direccion
@@ -140,15 +190,25 @@ def on_up_pressed():
 controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
 
 def crear_enemigo_tiktok():
-    global enemigo2, vida_enemigo2
-    enemigo2 = sprites.create(assets.image("""
+    global enemigo22, vida_enemigo2
+    enemigo22 = sprites.create(assets.image("""
         tiktok
         """), SpriteKind.enemy)
-    enemigo2.set_position(nena.x + randint(-60, 60), nena.y + randint(-60, 60))
+    enemigo22.set_position(nena.x + randint(-60, 60), nena.y + randint(-60, 60))
     vida_enemigo2 = statusbars.create(20, 2, StatusBarKind.enemy_health)
     vida_enemigo2.max = 20
-    vida_enemigo2.attach_to_sprite(enemigo2)
-    enemigo2.follow(nena, 20)
+    vida_enemigo2.value = 20
+    vida_enemigo2.attach_to_sprite(enemigo22)
+    enemigo22.follow(nena, 20)
+    enemigos.append(enemigo22)
+    barras_enemigo.append(vida_enemigo2)
+def poner_hud(img2: Image):
+    global rosa_hud
+    if rosa_hud:
+        sprites.destroy(rosa_hud)
+    rosa_hud = sprites.create(img2, SpriteKind.vacio)
+    rosa_hud.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    rosa_hud.z = 200
 def sceneOne():
     scene.set_background_image(assets.image("""
         fondo_3am
@@ -156,20 +216,24 @@ def sceneOne():
     game.show_long_text("Son les 3:33 AM. El mòbil vibra una altra vegada. No recordes quan has obert TikTok… però tampoc quan l'has deixat.",
         DialogLayout.BOTTOM)
     scenetwo()
+rosa_hud: Sprite = None
 vida_enemigo2: StatusBarSprite = None
-enemigo2: Sprite = None
+enemigo22: Sprite = None
 vida_jugador: StatusBarSprite = None
-rosa: Sprite = None
 nivel = 0
 rosas = 0
+barras_enemigo: List[StatusBarSprite] = []
+enemigos: List[Sprite] = []
 Play: Sprite = None
 ultima_direccion = ""
+rosa_actual: Sprite = None
+rosa = None
 nena: Sprite = None
 vida_enemigo = None
 enemigo3 = None
 ultima_direccion = "down"
 scene.set_background_image(assets.image("""
-    fondo_inicio0
+    fondo_inicio1
     """))
 sceneStart()
 
