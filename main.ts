@@ -7,6 +7,17 @@ namespace SpriteKind {
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Rose, function (player2, rose) {
     rosa_actual = rose
 })
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (nena) {
+        ultima_direccion = "up"
+        animation.runImageAnimation(
+        nena,
+        assets.animation`nena-animation-down0`,
+        500,
+        false
+        )
+    }
+})
 function sceneStart () {
     Play = sprites.create(assets.image`fondo_inicio0`, SpriteKind.vacio)
     while (!(controller.A.isPressed())) {
@@ -18,46 +29,29 @@ function sceneStart () {
     Play.setFlag(SpriteFlag.Invisible, true)
     sceneOne()
 }
-controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (nena) {
-        ultima_direccion = "down"
-        animation.runImageAnimation(
-        nena,
-        assets.animation`nena-animation-down`,
-        500,
-        false
-        )
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (!(nena) || !(rosa_actual)) {
+        return
     }
-})
-controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (nena) {
-        ultima_direccion = "right"
-        animation.runImageAnimation(
-        nena,
-        assets.animation`nena-animation-right`,
-        500,
-        false
-        )
+    if (!(nena.overlapsWith(rosa_actual))) {
+        rosa_actual = null
+return
     }
-})
-sprites.onDestroyed(SpriteKind.Enemy, function (enemigo2) {
-    let j: number;
-if (enemigos.indexOf(enemigo2) >= 0) {
-        j = enemigos.indexOf(enemigo2)
-        sprites.destroy(barras_enemigo[j])
-        barras_enemigo.removeAt(j)
-        enemigos.removeAt(j)
-    }
-})
-controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (nena) {
-        ultima_direccion = "left"
-        animation.runImageAnimation(
-        nena,
-        assets.animation`nena-animation-left`,
-        500,
-        false
-        )
+    sprites.destroy(rosa_actual, effects.none, 0)
+    rosa_actual = null
+rosas += 1
+    music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.UntilDone)
+    if (rosas == 1) {
+        poner_hud(assets.image`hud_rosas0`)
+    } else if (rosas == 2) {
+        poner_hud(assets.image`hud_rosas1`)
+    } else if (rosas == 3) {
+        poner_hud(assets.image`hud_rosas2`)
+        game.showLongText("Les tres roses s'uneixen. El temps s'atura. ", DialogLayout.Bottom)
+        pause(2000)
+        scenefour()
+    } else {
+    	
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -83,29 +77,24 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
             `, nena, 0, 150)
     }
 })
-controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (!(nena) || !(rosa_actual)) {
-        return
+controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (nena) {
+        ultima_direccion = "left"
+        animation.runImageAnimation(
+        nena,
+        assets.animation`nena-animation-left`,
+        500,
+        false
+        )
     }
-    if (!(nena.overlapsWith(rosa_actual))) {
-        rosa_actual = null
-return
-    }
-    sprites.destroy(rosa_actual, effects.none, 0)
-    rosa_actual = null
-rosas += 1
-    music.play(music.melodyPlayable(music.baDing), music.PlaybackMode.UntilDone)
-    if (rosas == 1) {
-        poner_hud(assets.image`hud_rosas0`)
-    } else if (rosas == 2) {
-        poner_hud(assets.image`hud_rosas1`)
-    } else if (rosas == 3) {
-        poner_hud(assets.image`hud_rosas2`)
-        game.showLongText("Les tres roses s'uneixen. El temps s'atura. ", DialogLayout.Bottom)
-        pause(2000)
-        scenefour()
-    } else {
-    	
+})
+sprites.onDestroyed(SpriteKind.Enemy, function (enemigo2) {
+    let j: number;
+if (enemigos.indexOf(enemigo2) >= 0) {
+        j = enemigos.indexOf(enemigo2)
+        sprites.destroy(barras_enemigo[j])
+        barras_enemigo.removeAt(j)
+        enemigos.removeAt(j)
     }
 })
 function scenethree () {
@@ -147,6 +136,17 @@ function scenetwo () {
     game.showLongText("El mòbil vibra. No és una notificació. Intentes bloquejar-lo. El botó no respon. Només un més. Aquesta vegada no ho decideixes tu.", DialogLayout.Bottom)
     scenethree()
 }
+controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (nena) {
+        ultima_direccion = "right"
+        animation.runImageAnimation(
+        nena,
+        assets.animation`nena-animation-left0`,
+        500,
+        false
+        )
+    }
+})
 function iniciar_nivel_1 () {
     let r: Sprite;
 music.play(music.createSong(hex`
@@ -168,17 +168,6 @@ tiles.setCurrentTilemap(tilemap`nivel1`)
         tiles.placeOnRandomTile(r, assets.tile`miMosaico`)
     }
 }
-controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (nena) {
-        ultima_direccion = "up"
-        animation.runImageAnimation(
-        nena,
-        assets.animation`nena-animation-up`,
-        500,
-        false
-        )
-    }
-})
 function crear_enemigo_tiktok () {
     enemigo22 = sprites.create(assets.image`tiktok`, SpriteKind.Enemy)
     enemigo22.setPosition(nena.x + randint(-60, 60), nena.y + randint(-60, 60))
@@ -190,6 +179,17 @@ function crear_enemigo_tiktok () {
     enemigos.push(enemigo22)
     barras_enemigo.push(vida_enemigo2)
 }
+controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (nena) {
+        ultima_direccion = "down"
+        animation.runImageAnimation(
+        nena,
+        assets.animation`nena-animation-down`,
+        500,
+        false
+        )
+    }
+})
 function poner_hud (img2: Image) {
     if (rosa_hud) {
         sprites.destroy(rosa_hud)
@@ -231,9 +231,9 @@ let enemigo22: Sprite = null
 let vida_jugador: StatusBarSprite = null
 let nivel = 0
 let fondo_transicion: Sprite = null
-let rosas = 0
 let barras_enemigo: StatusBarSprite[] = []
 let enemigos: Sprite[] = []
+let rosas = 0
 let Play: Sprite = null
 let ultima_direccion = ""
 let rosa_hud : Sprite = null
