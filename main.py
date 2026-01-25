@@ -16,7 +16,7 @@ def on_up_pressed():
         ultima_direccion = "up"
         animation.run_image_animation(nena,
             assets.animation("""
-                nena-animation-up
+                nena-animation-down0
                 """),
             500,
             False)
@@ -169,7 +169,7 @@ def on_right_pressed():
         ultima_direccion = "right"
         animation.run_image_animation(nena,
             assets.animation("""
-                nena-animation-right
+                nena-animation-left0
                 """),
             500,
             False)
@@ -305,5 +305,5 @@ def on_update_interval():
     elif nena and nivel == 2:
         crear_enemigo_youtube()
     else:
-        pass
+        music.set_volume(20)
 game.on_update_interval(4000, on_update_interval)
