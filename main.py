@@ -10,18 +10,26 @@ def on_on_overlap(player2, rose):
     rosa_actual = rose
 sprites.on_overlap(SpriteKind.player, SpriteKind.Rose, on_on_overlap)
 
-def on_up_pressed():
-    global ultima_direccion
-    if nena:
-        ultima_direccion = "up"
-        animation.run_image_animation(nena,
-            assets.animation("""
-                nena-animation-down0
-                """),
-            500,
-            False)
-controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
-
+def iniciar_nivel_3():
+    global nivel, nena, vida_jugador
+    sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
+    music.play(music.create_song(assets.song("""
+            cancion_boss
+            """)),
+        music.PlaybackMode.LOOPING_IN_BACKGROUND)
+    nivel = 3
+    tiles.set_current_tilemap(tilemap("""
+        nivel4
+        """))
+    nena = sprites.create(assets.image("""
+        nena-front
+        """), SpriteKind.player)
+    nena.set_position(40, 470)
+    controller.move_sprite(nena, 100, 100)
+    scene.camera_follow_sprite(nena)
+    vida_jugador = statusbars.create(20, 2, StatusBarKind.health)
+    vida_jugador.attach_to_sprite(nena)
 def sceneStart():
     global Play
     Play = sprites.create(assets.image("""
@@ -35,6 +43,95 @@ def sceneStart():
         pause(200)
     Play.set_flag(SpriteFlag.INVISIBLE, True)
     sceneOne()
+def torreta_dispara():
+    global dx, dy
+    if not (elon) or not (nena):
+        return
+    dx = nena.x - elon.x
+    dy = nena.y - elon.y
+    if abs(dx) > abs(dy):
+        vx = 80 if dx > 0 else -80
+        vy = 0
+    else:
+        vx = 0
+        vy = 80 if dy > 0 else -80
+    sprites.create_projectile_from_sprite(assets.image("""
+        bullet
+        """), elon, vx, vy)
+
+def on_down_pressed():
+    global ultima_direccion
+    if nena:
+        ultima_direccion = "down"
+        animation.run_image_animation(nena,
+            assets.animation("""
+                nena-animation-down
+                """),
+            500,
+            False)
+controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
+
+def on_right_pressed():
+    global ultima_direccion
+    if nena:
+        ultima_direccion = "right"
+        animation.run_image_animation(nena,
+            assets.animation("""
+                nena-animation-left0
+                """),
+            500,
+            False)
+controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
+
+def on_on_destroyed(enemigo2):
+    if enemigos.index_of(enemigo2) >= 0:
+        j = enemigos.index_of(enemigo2)
+        sprites.destroy(barras_enemigo[j])
+        barras_enemigo.remove_at(j)
+        enemigos.remove_at(j)
+sprites.on_destroyed(SpriteKind.enemy, on_on_destroyed)
+
+def on_left_pressed():
+    global ultima_direccion
+    if nena:
+        ultima_direccion = "left"
+        animation.run_image_animation(nena,
+            assets.animation("""
+                nena-animation-left
+                """),
+            500,
+            False)
+controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
+
+def on_a_pressed():
+    if not (nena):
+        return
+    music.play(music.create_sound_effect(WaveShape.TRIANGLE,
+            4342,
+            4246,
+            232,
+            0,
+            106,
+            SoundExpressionEffect.NONE,
+            InterpolationCurve.CURVE),
+        music.PlaybackMode.UNTIL_DONE)
+    if ultima_direccion == "right":
+        sprites.create_projectile_from_sprite(assets.image("""
+            bullet-1
+            """), nena, 150, 0)
+    elif ultima_direccion == "left":
+        sprites.create_projectile_from_sprite(assets.image("""
+            bullet-1
+            """), nena, -150, 0)
+    elif ultima_direccion == "up":
+        sprites.create_projectile_from_sprite(assets.image("""
+            bullet-1
+            """), nena, 0, -150)
+    elif ultima_direccion == "down":
+        sprites.create_projectile_from_sprite(assets.image("""
+            bullet-1
+            """), nena, 0, 150)
+controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
 
 def on_b_pressed():
     global rosa_actual, rosas
@@ -68,56 +165,6 @@ def on_b_pressed():
         pass
 controller.B.on_event(ControllerButtonEvent.PRESSED, on_b_pressed)
 
-def on_a_pressed():
-    if not (nena):
-        return
-    music.play(music.create_sound_effect(WaveShape.TRIANGLE,
-            4342,
-            4246,
-            232,
-            0,
-            106,
-            SoundExpressionEffect.NONE,
-            InterpolationCurve.CURVE),
-        music.PlaybackMode.UNTIL_DONE)
-    if ultima_direccion == "right":
-        sprites.create_projectile_from_sprite(assets.image("""
-            bullet-1
-            """), nena, 150, 0)
-    elif ultima_direccion == "left":
-        sprites.create_projectile_from_sprite(assets.image("""
-            bullet-1
-            """), nena, -150, 0)
-    elif ultima_direccion == "up":
-        sprites.create_projectile_from_sprite(assets.image("""
-            bullet-1
-            """), nena, 0, -150)
-    elif ultima_direccion == "down":
-        sprites.create_projectile_from_sprite(assets.image("""
-            bullet-1
-            """), nena, 0, 150)
-controller.A.on_event(ControllerButtonEvent.PRESSED, on_a_pressed)
-
-def on_left_pressed():
-    global ultima_direccion
-    if nena:
-        ultima_direccion = "left"
-        animation.run_image_animation(nena,
-            assets.animation("""
-                nena-animation-left
-                """),
-            500,
-            False)
-controller.left.on_event(ControllerButtonEvent.PRESSED, on_left_pressed)
-
-def on_on_destroyed(enemigo2):
-    if enemigos.index_of(enemigo2) >= 0:
-        j = enemigos.index_of(enemigo2)
-        sprites.destroy(barras_enemigo[j])
-        barras_enemigo.remove_at(j)
-        enemigos.remove_at(j)
-sprites.on_destroyed(SpriteKind.enemy, on_on_destroyed)
-
 def scenethree():
     scene.set_background_image(assets.image("""
         fondo_3am1
@@ -127,12 +174,18 @@ def scenethree():
     iniciar_nivel_1()
 
 def on_on_overlap2(bala, enemigo):
+    global muertes_n2, objetivo_n2
     sprites.destroy(bala)
     if enemigos.index_of(enemigo) >= 0:
         i = enemigos.index_of(enemigo)
         barras_enemigo[i].value += -10
         if barras_enemigo[i].value <= 0:
             sprites.destroy(enemigo)
+            if nivel == 2 and not (en_transicion):
+                muertes_n2 += 1
+                if muertes_n2 >= objetivo_n2:
+                    objetivo_n2 = 9999
+                    scenefive()
 sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap2)
 
 def scenefour():
@@ -162,19 +215,17 @@ def scenetwo():
     game.show_long_text("El mòbil vibra. No és una notificació. Intentes bloquejar-lo. El botó no respon. Només un més. Aquesta vegada no ho decideixes tu.",
         DialogLayout.BOTTOM)
     scenethree()
-
-def on_right_pressed():
-    global ultima_direccion
-    if nena:
-        ultima_direccion = "right"
-        animation.run_image_animation(nena,
-            assets.animation("""
-                nena-animation-left0
-                """),
-            500,
-            False)
-controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
-
+def crear_elon():
+    global elon
+    elon = sprites.create(assets.image("""
+        elon-front
+        """), SpriteKind.enemy)
+    tiles.place_on_random_tile(elon, sprites.dungeon.collectible_insignia)
+    elon.vx = 0
+    elon.vy = 0
+    elon.ax = 0
+    elon.ay = 0
+    elon.set_flag(SpriteFlag.GHOST, True)
 def iniciar_nivel_1():
     global nivel, rosas, rosa_actual, nena, vida_jugador
     music.play(music.create_song(hex("""
@@ -185,7 +236,7 @@ def iniciar_nivel_1():
     rosas = 0
     rosa_actual = None
     tiles.set_current_tilemap(tilemap("""
-        nivel1
+        nivel0
         """))
     nena = sprites.create(assets.image("""
         nena-front
@@ -199,12 +250,25 @@ def iniciar_nivel_1():
         hud_rosas
         """))
     for index in range(3):
-        r = sprites.create(assets.image("""
+        s = sprites.create(assets.image("""
             rose
             """), SpriteKind.Rose)
-        tiles.place_on_random_tile(r, assets.tile("""
+        tiles.place_on_random_tile(s, assets.tile("""
             miMosaico
             """))
+
+def on_up_pressed():
+    global ultima_direccion
+    if nena:
+        ultima_direccion = "up"
+        animation.run_image_animation(nena,
+            assets.animation("""
+                nena-animation-down0
+                """),
+            500,
+            False)
+controller.up.on_event(ControllerButtonEvent.PRESSED, on_up_pressed)
+
 def crear_enemigo_tiktok():
     global enemigo22, vida_enemigo2
     enemigo22 = sprites.create(assets.image("""
@@ -215,22 +279,9 @@ def crear_enemigo_tiktok():
     vida_enemigo2.max = 20
     vida_enemigo2.value = 20
     vida_enemigo2.attach_to_sprite(enemigo22)
-    enemigo22.follow(nena, 20)
+    enemigo22.follow(nena, 25)
     enemigos.append(enemigo22)
     barras_enemigo.append(vida_enemigo2)
-
-def on_down_pressed():
-    global ultima_direccion
-    if nena:
-        ultima_direccion = "down"
-        animation.run_image_animation(nena,
-            assets.animation("""
-                nena-animation-down
-                """),
-            500,
-            False)
-controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
-
 def poner_hud(img2: Image):
     global rosa_hud
     if rosa_hud:
@@ -239,8 +290,10 @@ def poner_hud(img2: Image):
     rosa_hud.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
     rosa_hud.z = 200
 def iniciar_nivel_2():
-    global nivel, nena, vida_jugador
+    global muertes_n2, nivel, vida_jugador
     sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
+    muertes_n2 = 0
     music.play(music.create_song(assets.song("""
             nivel2
             """)),
@@ -249,14 +302,162 @@ def iniciar_nivel_2():
     tiles.set_current_tilemap(tilemap("""
         nivel2
         """))
-    nena = sprites.create(assets.image("""
-        nena-front
-        """), SpriteKind.player)
     nena.set_position(40, 470)
     controller.move_sprite(nena, 100, 100)
     scene.camera_follow_sprite(nena)
     vida_jugador = statusbars.create(20, 2, StatusBarKind.health)
     vida_jugador.attach_to_sprite(nena)
+def scenefive():
+    global en_transicion, rosa_actual, rosa_hud, fondo_transicion
+    en_transicion = True
+    sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
+    music.stop_all_sounds()
+    rosa_actual = None
+    if rosa_hud:
+        sprites.destroy(rosa_hud)
+        rosa_hud = None
+    if nena:
+        controller.move_sprite(nena, 0, 0)
+        nena.set_flag(SpriteFlag.INVISIBLE, True)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
+    scene.camera_follow_sprite(None)
+    scene.center_camera_at(80, 60)
+    fondo_transicion = sprites.create(img("""
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbbbbbb
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbbbbb
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbbbb
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbb
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbbddbbbbddbbddbbddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbbb
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbcccbbbccccbbcccccccbbdddddbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbb
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbccccccccccccfffffffffcbbbbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddb
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbdddbcccccccffffcffffffffffffcbbbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbb
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbcccbbbcfccffffffffcffffffffffffccbbbbcbddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbb
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbfccccccffffffffffcccffccfffccfffcbbbbbbbddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbfcccfccffcfffffccccccccccfccccccccccbbcbddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddcbbfccffcfffffffffccccccccccfcccccccccccccbbbddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbfcbcfffffffccfffffccccccfccccfccccccccccccbbdbdddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddcfcbccffffffffffffffcccfffcfccfcfcccfccccccbdbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddbffccfcfffffccffffffffffffffffcffffffffcfccfcbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddbbcffffffcccfcccffffffffffffffffffffffffffffffcbbbbddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddbcccffffffccfffffffffcfffffffffffffffffffffffffcbbbbbccbbbbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddcccfffffffcffffffffffccffffffffffffffffffffffffccccccccccbbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddbccfffffffffffffffffffffffcccccccccffffffffffffffccccccccbbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddbcfffffffffffffffcccccccccceeeeeeccccccfffffffffffcccccccbbbddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddbccffffffffffffcccccceeeeeebbbbbbbbbbbbeecffffffffffffcccccbbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbcffffffffffffcceeeeebbbbbbbddddddddddddbbeefffffffcccccccccbbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddbddbcffffffffffffceeebbbbbbdddddddddddddddddddbbcfffffffcccccccccbddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddbbbccffffffffffffceebbbbbddddddddddddddddddddddddbcfffffffccccccccbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddbccccffffffffffceebbbbbdddddddddddddddddddddddddbecffffcccccccccbbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddbccfffffffffceebbbbbdddddddddddddddddddddddddddbeffffccccfffffcbddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddcfffffffffceebbbbddddddddddddddddddddddddddddddbcffccfccfffffcbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddbcccfffffffeeebbbbddddddddddddddddddddddddddddddbccffffffffcfccbddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddbcccfffffffceebbbbdddddddddddddddddddddddddddddddbecfffffffcccccbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddbbcfffffffceebbbbdddddddddddddddddddddddddddddddbbccfffcffffccbbddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbcfffffceeebbbbddddddddddddddddddddddddddddddddbccffffffffcbbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbcfffffceeebbbbbddddddddddddddddddddddddddddddbbbccffffffffcbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbcfffffeeebbbbbbddddddddddddddddddddddddddddddbbbccffffffffcbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbfffffceeebbbbbbddddddddddddddddddddddddddddddbbeccffffffffcbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbcffffceeebbbbbbddddddddddddddddddddddddddddddbbeecffffffffcbdddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddbcffffceebbbbbbbdddddddddddddddddddddddddddddddbeeccffffffcbddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddcfffceeebbbbbbbdddddddddddddddddddddddddddddddbecffffffffcbddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddbcffceeebbbbbbbddddddddddddddd1d11dddddddddddddbecfffffffcbddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddbcffceeebbbbbbdddddddddddddddd11111dddddddddddddbeccffffcbdddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddcffeeeebbbbbbdddddddddddddddd111111dddddddddddddeecffffcbdddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddcffeeeebbbbbdddddddddddddddddddddddbddddddddddddeecffffcddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddcffeeeeebebbbbbdddddddddddddddbbbbebddddddddddddbecccffbddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddcffeeeeeeeeeeebbbdddddddddddbeeeeebbbbbdddddddddbeeefccbddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddcffeeeeeeeeeeeeebbbddddddddbbbbbbbbbbbbdbdddddddbecefccbddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddbcfeeeeeeeebbbbbeebbdddddddbbbbdddddddddddddddddbececccbddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddbcfeeeeeeebbbdddbeebbddddddbbbbbbdddddddddddddddbececcccddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddcfeeeeeeebbbbddbbeebdd1dddbbbeeebebbdddddddddddbeceeeebddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddcfeeeeeeeeeccbbeeeeedd11dbbeebbcccbebbdddddddddbecbbebbddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddcfceeeeeccccccbbeeeebd11ddbbbbbbbbdbbbdddddddddbeebbbbdddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddbcceeeeeeebbbbdbbbeebddddddbbbdddddddddddddddddbeeeddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddbeceeeeeebbbbddddbeebddddddbbbbdddddddddddddddbbccbddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddbcceeebbbbbbbbbbbbeebdddddddbbbbbddddddddddddbbbecbddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddbcceeebbbbbbbbbbbbbebdddddd1dddddddddddddddddbbbeebddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddcceeebbbbbbbbddbbbebdddddd111dddddddddddddddbbeebbddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddbceeebbbbbbbdddbbbebddddddddddddddddddddddddbbeeddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddceeeebbbbbddddbbeebddddddddddddddddddddddddbbebddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddceeeebbbbddddbbbeebddddddddddddddddddddddddbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeebbbbddddbbeeebddddddddddddddddddddddddbbbddddbddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeebbbbddddbbeeebdddddddddddddddddddddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeebbbdddddbbeeebdddddddddddddddddddddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeebbbddddbbbeeebbddbbbddddbddddddddddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeebbbbbdbbbbeccebbbbebbddddbdddddddddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeebbbbbdbbbbeeceebbbbbbddddbbbdddddddddddbb1ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeebbbbbbbbbeeeceebdddddddddbbbdddddbddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeeebbbbbbbbbbeebbbddddddddddbbbbbbbdddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeeebbbbbbbbbbbbbddddddddddddddbbbdddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeebbbbbbbbbbbdddddddddddddddddddddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeebbbbbebbbbbdddddddddddddddddddddddddbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeebbbbeebbbbbbbdbbbbdddddbdddddddddddbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeebbbeeeeeeeeeeebbbeeeebbbbdddddddddbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeeebbbbecfcccbbbbddbbbbbbbdbbdddddddbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeebbbbeeccceebbbdbbddbbddddddddddddbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeebbdbbeeeebbbbb3ddddddd11ddddddddbbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeeebdbbeeeeebbbbbddddddd11ddddddddbbbbbbdddddddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddeeeeeebbbbeeeebbbbbbbddddd1ddddddddbbbbbbbbddbdddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeeebbbbeeeebbbbbbbddddddddddddddbbbbbbbbbdcbddddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeeebbbbbeebbbbbbddddddddddddddbbbbbbddbedbcbdddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddceeeeebbbbbbbbbbddddddddddddddddbbbbbddddc1dccdddddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbeeeebbbbbbbbdddddddddddddddddbbbbbddddde1dfcbddddddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddceeeebbbbbbbddddddddddddddddbbbbbdddddbe1dfffbdddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbceeeeebbbbbbdddddddddddddbbbbbbbddddddbb1dfcffbddddddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddccceeeebbbbbbdddddddddddbbbbbbbbdddddddb11dccfffbdddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddcfcceeeeeebbbbbdbbddddddbbbbbbbbdddddddbd11dccffffbddddddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddbcffcccceeeebbbbbbbbbbbbbbbbbbbbbddddddddb111dcccffffcbddddddddddddddddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddddddddddddddbbbffffcbccceeeeeebbbbbbbbbbbbbbbbbddddddddbd111dfccffffffbdddddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddddbbcffffffcbbcccceecccebbbbbbbeebbbbbdddddddddbd1111dfcccffffffcbbddddddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddddbccffffffffcbbbccceeeeeeeebbeebbbebbbddddddddddd11111dfccccfffffffccbbbddddddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddddbcfffffffffffcbdbbcceeeeeeeeebbbbbbbbbddddddddddbd11111dccccccffcfffcccccccbdddddddddddddddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddddddddddddddccfffffffffffffcdddbceeeeeeeeeebbbbbbbdddddddddddbd111111bccccccccccffccccccccccbddddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddddbccfffffffffffffffcddddbeeeeeeeeeebbbbbbdddddddddddbd1111111bccccccccccffcccccccccccccddddddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddddcccfffffffffffffffffcdddddeebbbbbbbbbbbbbddddddddddddd1111111dcccccccccccfffccccccccccccccbdddddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddddccffffffffffffffffffffcdd11dbbbbbbbbbbbbbbdddddddddddddd1111111dccccccccccccffccccccccccccccccbdddddddddddddddddddddddd
+            ddddddddddddddddddddddddddddddddddddddcfffffffffffffffffffffffcdd111dbbbbbbbbbbbbbbddddddddddbd11111111dccccccccccccffccccccccccccccccccbdddddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddddbcfffffffffffffffffffffffffcd11ddd1ddbbbbbbbbbbddddddddddbd111111111dccccccccccccffccccccccccccccccccccbdddddddddddddddddddd
+            dddddddddddddddddddddddddddddddddcffffffffffffffffffffffffffffcddbbdddddd1dbbbbbbbbbbdddddddd1111111111dccccccccccccffccccccccccccccccccccccbdddddddddddddddddd
+            ddddddddddddddddddddddddddddddbcffffffffffffffffffffffffffffffcddbbddddddddddbbbbbbbbbbbddd1111d1111111dccccccccccccffcccccccccccccccccccccccbddddddddddddddddd
+            ddddddddddddddddddddddddddddbfffffffffffffffffffffffffffffffffbdbdddddddddd1dddbbbbbbbbddd11111ddd11111bccccccccccccfcccccccccccccccccccccccccfbbdddddddddddddd
+            ddddddddddddddddddddddddbbbffffffffffffffffffffffffffffffffffcdddddddd1ddddddddddbbbbbbdd111111dddd1111bccccccccccccfcccccccccccccccccccccccccccccbbddddddddddd
+            ddddddddddddddddddddddbcfffffffffffffffffffffffffffffffffffffcdddddddddddddddddddddbbbbd1111111dddd1111bccccccccccccfcccccccccccccccccccccccccccccccbbddddddddd
+            dddddddddddddddddddbbcfffffffffffffffffffffffffffffffffffffffc11dd11ddddd111dddddddddbbd1111111ddddd111cccccccccccccfcccccccccccccccccccccccccccccccccbbddddddd
+            ddddddddddddddddddbcfffffffffffffffffffffffffffffffffffffffffc11111111ddd11ddddddddddbbd11111111dddd11dcccccccccccccfcfcccccccccccccccccccccccccccccccccbbddddd
+            dddddddddddddddddbcffffffffffffffffffffffffffffffffffffffffffc111111111dd1dddddddddddddd111111111dddd1dcccccccccccccccfccccccccccccccccccccccccccccccccccccbddd
+            dddddddddddddddddcfffffffffffffffffffffffffffffffffffffffffffc111111111dddddddddddddddddd111111111ddd1dcccccccccccccfcfcccccccccccccccccccccccccccccccccccccddd
+            ddddddddddddddddbffffffffffffffffffffffffffffffffffffffffffffc1111111111dd1ddddddddddddddd1111111111d1dcccccccccccccfccccccccccccccccccccccccccccccccccccccfbdd
+            ddddddddddddddddcfffffffffffffffffffffffffffffffffffffffffffcc11111111111dd1dddddddddddbbbd1111111111dbccccccccccccccccccccccccccccccccccccccccccccccccccccfcdd
+            ddddddddddddddddffffffffffffffffffffffffffffffffffffffffffffccd1111111111ddd1ddddddddddbbbb1111111111dccccccccccccccccccccccccccccccccccccccccccccccccccccfffdd
+            ddddddddddddddddffffffffffffffffffffffffffffffffffffffffffffccd11111111111dddddddddddddbbbd11111111111ccccccccccccccccccccccccccccccccccccccccccccccccffccfffdd
+            ddddddddddddddddffffffffffffffffffffffffffffffffffffffffffffccd11111111111ddd11ddddddddbbd11111111111dccccccccccccccccccccccccccccccccccccccccccccccccffccfffbd
+            dddddddddddddddbffffffffffffffffffffffffffffffffffffffffffffcc1111111111111dddddddddddddd111111111111bccccccccccccccccccccccccccccccccccccccccccccccccfccffffbd
+            dddddddddddddddbffffffffffffffffffffffffffffffffffffffffffffcb11111111111111dd1ddddddddd1111111111111dcccccccccccccccccccccccccccccccccccccccccccccccffccffffcd
+            dddddddddddddddcffffffffffffffffffffffffffffffffffffffffffffcb111111111111111dddddddddd11111111111111bcccccccccccccccccccccccccccccccccccccccccccccccffccffffcd
+            dddddddddddddddcffffffffffffffffffffffffffffffffffffffffffffcb111111111111111ddddddddd111111111111111cccccccccccccccccccccccccccccccccccccccccccccccfffcffffffd
+            dddddddddddddddcffffffffffffffffffffffffffffffffffffffffffffcd1111111111111111ddddddd1111111111111111cccccccccccccccccccccccccccccccccccccccccccccccffccffffffd
+            dddddddddddddddffffffffffffffffffffffffffffffffffffffffffffccd11111111111111111ddddd11111111111111111ccccccccccccccccccccccccccccccccccccccccccccccfffccffffffd
+            dddddddddddddddffffffffffffffffffffffffffffffffffffffffffffccd111111111111111111dd111111111111111111dccccccccccccccccccccccccccccccccccccccccccccccffcccffffffb
+            dddddddddddddddffffffffffffffffffffffffffffffffffffffffffffcc111111111111111111111111111111111111111dccccccccccccccccccccccccccccccccccccccccccccccffcccffffffb
+            dddddddddddddddffffffffffffffffffffffffffffffffffffffffffffcc111111111111111111111111111111111111111bcccccccccccccccccccccccccccccccccccccccccccccfffccfffffffb
+            ddddddddddddddbffffffffffffffffffffffffffffffffffffffffffffcc111111111111111111111111111111111111111cccccccccccccccccccccccccccccccccccccccccccccffffccfffffffb
+            ddddddddddddddbffffffffffffffffffffffffffffffffffffffffffffcc111111111111111111111111111111111111111ccccccccccccccccccccccccccccccccccccccccccccccffccffffffffc
+            ddddddddddddddbffffffffffffffffffffffffffffffffffffffffffffcc111111111111111111111111111111111111111cccccccccccccccccccccccccccccccccccccccccccccfffccfffffffff
+            """),
+        SpriteKind.vacio)
+    fondo_transicion.set_position(80, 60)
+    fondo_transicion.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    fondo_transicion.set_flag(SpriteFlag.GHOST, True)
+    fondo_transicion.z = 2000
+    fondo_transicion.start_effect(effects.cool_radial, 500)
+    game.show_long_text("El veus al final de la habitació... t'està esperant.",
+        DialogLayout.BOTTOM)
+    pause(1200)
+    sprites.destroy(fondo_transicion)
+    iniciar_nivel_3()
+    en_transicion = False
 def sceneOne():
     scene.set_background_image(assets.image("""
         fondo_3am
@@ -274,36 +475,43 @@ def crear_enemigo_youtube():
     vida_enemigo2.max = 30
     vida_enemigo2.value = 30
     vida_enemigo2.attach_to_sprite(enemigo22)
-    enemigo22.follow(nena, 20)
+    enemigo22.follow(nena, 30)
     enemigos.append(enemigo22)
     barras_enemigo.append(vida_enemigo2)
 vida_enemigo2: StatusBarSprite = None
 enemigo22: Sprite = None
-vida_jugador: StatusBarSprite = None
-nivel = 0
 fondo_transicion: Sprite = None
+muertes_n2 = 0
+en_transicion = False
+rosas = 0
 barras_enemigo: List[StatusBarSprite] = []
 enemigos: List[Sprite] = []
-rosas = 0
-Play: Sprite = None
 ultima_direccion = ""
-enemigo3 = None
-vida_enemigo = None
+Play: Sprite = None
+vida_jugador: StatusBarSprite = None
+nivel = 0
+objetivo_n2 = 0
+elon: Sprite = None
+dx = 0
+dy = 0
 nena: Sprite = None
-rosa = None
 rosa_actual: Sprite = None
 rosa_hud: Sprite = None
-ultima_direccion = "down"
+# LOCAL: objetivo y boss + apuntado
+objetivo_n2 = 15
+# --------------------
+# START
+# --------------------
 scene.set_background_image(assets.image("""
     fondo_inicio1
     """))
 sceneStart()
 
 def on_update_interval():
+    if en_transicion:
+        return
     if nena and nivel == 1:
         crear_enemigo_tiktok()
     elif nena and nivel == 2:
         crear_enemigo_youtube()
-    else:
-        music.set_volume(20)
 game.on_update_interval(4000, on_update_interval)
