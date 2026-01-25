@@ -99,9 +99,13 @@ rosas += 1
         poner_hud(assets.image`hud_rosas0`)
     } else if (rosas == 2) {
         poner_hud(assets.image`hud_rosas1`)
-    } else {
+    } else if (rosas == 3) {
         poner_hud(assets.image`hud_rosas2`)
-        abrir_puerta()
+        game.showLongText("Les tres roses s'uneixen. El temps s'atura. ", DialogLayout.Bottom)
+        pause(2000)
+        scenefour()
+    } else {
+    	
     }
 })
 function scenethree () {
@@ -120,8 +124,23 @@ sprites.destroy(bala)
         }
     }
 })
-function abrir_puerta () {
-    tiles.setTileAt(tiles.getTileLocation(10, 5), assets.tile`transparency16`)
+function scenefour () {
+    music.stopAllSounds()
+    if (rosa_hud) {
+        sprites.destroy(rosa_hud)
+        rosa_hud = null
+    }
+    rosa_actual = null
+scene.cameraFollowSprite(null)
+    scene.centerCameraAt(80, 60)
+    fondo_transicion = sprites.create(assets.image`fondo_rosas`, SpriteKind.vacio)
+    fondo_transicion.startEffect(effects.coolRadial, 500)
+    fondo_transicion.setPosition(80, 60)
+    fondo_transicion.z = 1000
+    game.showLongText("Les tres roses bateguen alhora. La pantalla s'obre… i caus a la planta següent.", DialogLayout.Bottom)
+    pause(2000)
+    sprites.destroy(fondo_transicion)
+    iniciar_nivel_2()
 }
 function scenetwo () {
     scene.setBackgroundImage(assets.image`fondo_3am0`)
@@ -179,31 +198,59 @@ function poner_hud (img2: Image) {
     rosa_hud.setFlag(SpriteFlag.RelativeToCamera, true)
     rosa_hud.z = 200
 }
+function iniciar_nivel_2 () {
+    sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
+    music.play(music.createSong(assets.song`nivel2`), music.PlaybackMode.LoopingInBackground)
+    nivel = 2
+    tiles.setCurrentTilemap(tilemap`nivel2`)
+    nena = sprites.create(assets.image`nena-front`, SpriteKind.Player)
+    nena.setPosition(40, 470)
+    controller.moveSprite(nena, 100, 100)
+    scene.cameraFollowSprite(nena)
+    vida_jugador = statusbars.create(20, 2, StatusBarKind.Health)
+    vida_jugador.attachToSprite(nena)
+}
 function sceneOne () {
     scene.setBackgroundImage(assets.image`fondo_3am`)
     game.showLongText("Son les 3:33 AM. El mòbil vibra una altra vegada. No recordes quan has obert TikTok… però tampoc quan l'has deixat.", DialogLayout.Bottom)
     scenetwo()
 }
-let rosa_hud: Sprite = null
+function crear_enemigo_youtube () {
+    enemigo22 = sprites.create(assets.image`youtubre`, SpriteKind.Enemy)
+    enemigo22.setPosition(nena.x + randint(-60, 60), nena.y + randint(-60, 60))
+    vida_enemigo2 = statusbars.create(20, 2, StatusBarKind.EnemyHealth)
+    vida_enemigo2.max = 30
+    vida_enemigo2.value = 30
+    vida_enemigo2.attachToSprite(enemigo22)
+    enemigo22.follow(nena, 20)
+    enemigos.push(enemigo22)
+    barras_enemigo.push(vida_enemigo2)
+}
 let vida_enemigo2: StatusBarSprite = null
 let enemigo22: Sprite = null
 let vida_jugador: StatusBarSprite = null
 let nivel = 0
+let fondo_transicion: Sprite = null
 let rosas = 0
 let barras_enemigo: StatusBarSprite[] = []
 let enemigos: Sprite[] = []
 let Play: Sprite = null
 let ultima_direccion = ""
-let enemigo3 = null
-let vida_enemigo = null
-let nena : Sprite = null
-let rosa = null
+let rosa_hud : Sprite = null
 let rosa_actual : Sprite = null
+let rosa = null
+let nena : Sprite = null
+let vida_enemigo = null
+let enemigo3 = null
 ultima_direccion = "down"
 scene.setBackgroundImage(assets.image`fondo_inicio1`)
 sceneStart()
 game.onUpdateInterval(4000, function () {
     if (nena && nivel == 1) {
         crear_enemigo_tiktok()
+    } else if (nena && nivel == 2) {
+        crear_enemigo_youtube()
+    } else {
+    	
     }
 })
