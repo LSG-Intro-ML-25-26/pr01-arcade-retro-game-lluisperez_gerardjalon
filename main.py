@@ -56,7 +56,7 @@ def torreta_dispara():
         vx = 0
         vy = 80 if dy > 0 else -80
     sprites.create_projectile_from_sprite(assets.image("""
-        bullet
+        ellon-bullet
         """), elon, vx, vy)
 
 def on_down_pressed():
@@ -70,6 +70,26 @@ def on_down_pressed():
             500,
             False)
 controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
+
+def on_on_overlap2(jugador, enemigo):
+    global invulnerable
+    if invulnerable:
+        return
+    invulnerable = True
+    vida_jugador.value -= 10
+    nena.start_effect(effects.fountain, 500)
+    music.play(music.create_sound_effect(WaveShape.NOISE,
+            2000,
+            1,
+            255,
+            0,
+            120,
+            SoundExpressionEffect.NONE,
+            InterpolationCurve.CURVE),
+        music.PlaybackMode.IN_BACKGROUND)
+    pause(600)
+    invulnerable = False
+sprites.on_overlap(SpriteKind.player, SpriteKind.enemy, on_on_overlap2)
 
 def on_right_pressed():
     global ultima_direccion
@@ -172,22 +192,6 @@ def scenethree():
     game.show_long_text("La pantalla s'estira. El soroll canvia. El temps s'atura. Notes el cos pesat. Com si caiguessis… cap endins.",
         DialogLayout.BOTTOM)
     iniciar_nivel_1()
-
-def on_on_overlap2(bala, enemigo):
-    global muertes_n2, objetivo_n2
-    sprites.destroy(bala)
-    if enemigos.index_of(enemigo) >= 0:
-        i = enemigos.index_of(enemigo)
-        barras_enemigo[i].value += -10
-        if barras_enemigo[i].value <= 0:
-            sprites.destroy(enemigo)
-            if nivel == 2 and not (en_transicion):
-                muertes_n2 += 1
-                if muertes_n2 >= objetivo_n2:
-                    objetivo_n2 = 9999
-                    scenefive()
-sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap2)
-
 def scenefour():
     global rosa_hud, rosa_actual, fondo_transicion
     music.stop_all_sounds()
@@ -220,12 +224,30 @@ def crear_elon():
     elon = sprites.create(assets.image("""
         elon-front
         """), SpriteKind.enemy)
-    tiles.place_on_random_tile(elon, sprites.dungeon.collectible_insignia)
+    tiles.place_on_random_tile(elon, assets.tile("""
+        transparency16
+        """))
     elon.vx = 0
     elon.vy = 0
     elon.ax = 0
     elon.ay = 0
     elon.set_flag(SpriteFlag.GHOST, True)
+
+def on_on_overlap3(bala, enemigo3):
+    global muertes_n2, objetivo_n2
+    sprites.destroy(bala)
+    if enemigos.index_of(enemigo3) >= 0:
+        i = enemigos.index_of(enemigo3)
+        barras_enemigo[i].value += -10
+        if barras_enemigo[i].value <= 0:
+            sprites.destroy(enemigo3)
+            if nivel == 2 and not (en_transicion):
+                muertes_n2 += 1
+                if muertes_n2 >= objetivo_n2:
+                    objetivo_n2 = 9999
+                    scenefive()
+sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap3)
+
 def iniciar_nivel_1():
     global nivel, rosas, rosa_actual, nena, vida_jugador
     music.play(music.create_song(hex("""
@@ -465,6 +487,14 @@ def sceneOne():
     game.show_long_text("Son les 3:33 AM. El mòbil vibra una altra vegada. No recordes quan has obert TikTok… però tampoc quan l'has deixat.",
         DialogLayout.BOTTOM)
     scenetwo()
+
+def on_on_zero(vida):
+    music.stop_all_sounds()
+    game.over(False)
+    music.play(music.melody_playable(music.wawawawaa),
+        music.PlaybackMode.UNTIL_DONE)
+statusbars.on_zero(StatusBarKind.health, on_on_zero)
+
 def crear_enemigo_youtube():
     global enemigo22, vida_enemigo2
     enemigo22 = sprites.create(assets.image("""
@@ -480,17 +510,18 @@ def crear_enemigo_youtube():
     barras_enemigo.append(vida_enemigo2)
 vida_enemigo2: StatusBarSprite = None
 enemigo22: Sprite = None
-fondo_transicion: Sprite = None
 muertes_n2 = 0
 en_transicion = False
+fondo_transicion: Sprite = None
 rosas = 0
 barras_enemigo: List[StatusBarSprite] = []
 enemigos: List[Sprite] = []
+invulnerable = False
 ultima_direccion = ""
 Play: Sprite = None
-vida_jugador: StatusBarSprite = None
 nivel = 0
 objetivo_n2 = 0
+vida_jugador: StatusBarSprite = None
 elon: Sprite = None
 dx = 0
 dy = 0
