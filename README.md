@@ -2,7 +2,7 @@
 
 ## Integrants
 
-* Lluís
+* Luis Pérez
 * Gerard Jalon
 
 ## Lore del joc
