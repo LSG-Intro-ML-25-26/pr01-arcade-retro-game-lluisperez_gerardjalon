@@ -4,6 +4,10 @@ class SpriteKind:
     cursor = SpriteKind.create()
     vacio = SpriteKind.create()
     Rose = SpriteKind.create()
+    bossBullet = SpriteKind.create()
+@namespace
+class StatusBarKind:
+    boss_health = StatusBarKind.create()
 
 def on_on_overlap(player2, rose):
     global rosa_actual
@@ -11,9 +15,12 @@ def on_on_overlap(player2, rose):
 sprites.on_overlap(SpriteKind.player, SpriteKind.Rose, on_on_overlap)
 
 def iniciar_nivel_3():
-    global nivel, nena, vida_jugador
+    global vida_jugador, nivel, nena
     sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
     sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
+    if vida_jugador:
+        sprites.destroy(vida_jugador)
+        vida_jugador = None
     music.play(music.create_song(assets.song("""
             cancion_boss
             """)),
@@ -30,6 +37,9 @@ def iniciar_nivel_3():
     scene.camera_follow_sprite(nena)
     vida_jugador = statusbars.create(20, 2, StatusBarKind.health)
     vida_jugador.attach_to_sprite(nena)
+    crear_elon()
+def signo(n: number):
+    return 1 if n > 0 else (-1 if n < 0 else 0)
 def sceneStart():
     global Play
     Play = sprites.create(assets.image("""
@@ -44,20 +54,58 @@ def sceneStart():
     Play.set_flag(SpriteFlag.INVISIBLE, True)
     sceneOne()
 def torreta_dispara():
-    global dx, dy
+    global dx, dy, sx, sy, bala3
     if not (elon) or not (nena):
         return
     dx = nena.x - elon.x
     dy = nena.y - elon.y
-    if abs(dx) > abs(dy):
-        vx = 80 if dx > 0 else -80
-        vy = 0
-    else:
-        vx = 0
-        vy = 80 if dy > 0 else -80
-    sprites.create_projectile_from_sprite(assets.image("""
-        ellon-bullet
-        """), elon, vx, vy)
+    sx = signo(dx)
+    sy = signo(dy)
+    if abs(dx) < 10:
+        sx = 0
+    if abs(dy) < 10:
+        sy = 0
+    bala3 = sprites.create_projectile_from_sprite(assets.image("""
+            elon-bullet
+            """),
+        elon,
+        sx * 80,
+        sy * 80)
+    bala3.set_kind(SpriteKind.bossBullet)
+    animation.run_image_animation(bala3,
+        assets.animation("""
+            elon-bullet-a
+            """),
+        100,
+        True)
+    bala3.lifespan = 2000
+
+def on_on_overlap2(jugador, bala):
+    global invulnerable_boss
+    if invulnerable_boss:
+        return
+    invulnerable_boss = True
+    sprites.destroy(bala)
+    vida_jugador.value -= 20
+    jugador.start_effect(effects.fire, 200)
+    jugador.set_flag(SpriteFlag.GHOST, True)
+    pause(400)
+    jugador.set_flag(SpriteFlag.GHOST, False)
+    invulnerable_boss = False
+sprites.on_overlap(SpriteKind.player, SpriteKind.bossBullet, on_on_overlap2)
+
+def on_on_overlap3(player22, enemy):
+    global invulnerable
+    if invulnerable:
+        return
+    invulnerable = True
+    vida_jugador.value -= 10
+    player22.start_effect(effects.spray, 200)
+    player22.set_flag(SpriteFlag.GHOST, True)
+    pause(400)
+    player22.set_flag(SpriteFlag.GHOST, False)
+    invulnerable = False
+sprites.on_overlap(SpriteKind.player, SpriteKind.enemy, on_on_overlap3)
 
 def on_down_pressed():
     global ultima_direccion
@@ -71,25 +119,14 @@ def on_down_pressed():
             False)
 controller.down.on_event(ControllerButtonEvent.PRESSED, on_down_pressed)
 
-def on_on_overlap2(jugador, enemigo):
-    global invulnerable
-    if invulnerable:
-        return
-    invulnerable = True
-    vida_jugador.value -= 10
-    nena.start_effect(effects.fountain, 500)
-    music.play(music.create_sound_effect(WaveShape.NOISE,
-            2000,
-            1,
-            255,
-            0,
-            120,
-            SoundExpressionEffect.NONE,
-            InterpolationCurve.CURVE),
-        music.PlaybackMode.IN_BACKGROUND)
-    pause(600)
-    invulnerable = False
-sprites.on_overlap(SpriteKind.player, SpriteKind.enemy, on_on_overlap2)
+def on_on_zero(barra):
+    global s, elon
+    s = barra.sprite_attached_to()
+    if s:
+        sprites.destroy(s)
+    elon = None
+    sprites.destroy_all_sprites_of_kind(SpriteKind.bossBullet)
+statusbars.on_zero(StatusBarKind.boss_health, on_on_zero)
 
 def on_right_pressed():
     global ultima_direccion
@@ -177,14 +214,44 @@ def on_b_pressed():
         poner_hud(assets.image("""
             hud_rosas2
             """))
-        game.show_long_text("Les tres roses s'uneixen. El temps s'atura. ",
-            DialogLayout.BOTTOM)
+        game.show_long_text("Has aconseguit les tres roses.", DialogLayout.BOTTOM)
         pause(2000)
         scenefour()
     else:
         pass
 controller.B.on_event(ControllerButtonEvent.PRESSED, on_b_pressed)
 
+def sceneWin():
+    global en_transicion, rosa_hud, vida_jugador, nena, win
+    en_transicion = True
+    music.stop_all_sounds()
+    sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
+    sprites.destroy_all_sprites_of_kind(SpriteKind.bossBullet)
+    if rosa_hud:
+        sprites.destroy(rosa_hud)
+        rosa_hud = None
+    if vida_jugador:
+        sprites.destroy(vida_jugador)
+        vida_jugador = None
+    if nena:
+        controller.move_sprite(nena, 0, 0)
+        sprites.destroy(nena)
+        nena = None
+    tiles.set_current_tilemap(tilemap("""
+        nivel_vacio
+        """))
+    scene.camera_follow_sprite(None)
+    scene.center_camera_at(80, 60)
+    win = sprites.create(assets.image("""
+        fondo_7am
+        """), SpriteKind.vacio)
+    win.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
+    win.set_position(80, 60)
+    win.z = 9999
+    game.show_long_text("Són les 7:00 AM. Tot era un mal somni", DialogLayout.BOTTOM)
+    pause(800)
+    game.over(True, effects.confetti)
 def scenethree():
     scene.set_background_image(assets.image("""
         fondo_3am1
@@ -192,6 +259,30 @@ def scenethree():
     game.show_long_text("La pantalla s'estira. El soroll canvia. El temps s'atura. Notes el cos pesat. Com si caiguessis… cap endins.",
         DialogLayout.BOTTOM)
     iniciar_nivel_1()
+
+def on_on_overlap4(bala2, enemigo):
+    global es_elon, i, barra22, muertes_n2, elon
+    sprites.destroy(bala2)
+    es_elon = enemigo == elon
+    if enemigos.index_of(enemigo) < 0:
+        return
+    i = enemigos.index_of(enemigo)
+    barra22 = barras_enemigo[i]
+    barra22.value -= 10
+    if barra22.value > 0:
+        return
+    sprites.destroy(enemigo)
+    if nivel == 2:
+        muertes_n2 += 1
+        if muertes_n2 >= objetivo_n2:
+            scenefive()
+    if es_elon:
+        elon = None
+        sprites.destroy_all_sprites_of_kind(SpriteKind.bossBullet)
+        sceneWin()
+        return
+sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap4)
+
 def scenefour():
     global rosa_hud, rosa_actual, fondo_transicion
     music.stop_all_sounds()
@@ -207,7 +298,7 @@ def scenefour():
     fondo_transicion.start_effect(effects.cool_radial, 500)
     fondo_transicion.set_position(80, 60)
     fondo_transicion.z = 1000
-    game.show_long_text("Les tres roses bateguen alhora. La pantalla s'obre… i caus a la planta següent.",
+    game.show_long_text("Amb totes les donacions obtenides, s'obre una escalera a la següent planta.",
         DialogLayout.BOTTOM)
     pause(2000)
     sprites.destroy(fondo_transicion)
@@ -220,34 +311,21 @@ def scenetwo():
         DialogLayout.BOTTOM)
     scenethree()
 def crear_elon():
-    global elon
+    global elon, vida_enemigo2
     elon = sprites.create(assets.image("""
         elon-front
         """), SpriteKind.enemy)
-    tiles.place_on_random_tile(elon, assets.tile("""
-        transparency16
-        """))
+    vida_enemigo2 = statusbars.create(20, 4, StatusBarKind.boss_health)
+    vida_enemigo2.max = 100
+    vida_enemigo2.value = 100
+    vida_enemigo2.attach_to_sprite(elon)
+    enemigos.append(elon)
+    barras_enemigo.append(vida_enemigo2)
     elon.vx = 0
     elon.vy = 0
     elon.ax = 0
     elon.ay = 0
-    elon.set_flag(SpriteFlag.GHOST, True)
-
-def on_on_overlap3(bala, enemigo3):
-    global muertes_n2, objetivo_n2
-    sprites.destroy(bala)
-    if enemigos.index_of(enemigo3) >= 0:
-        i = enemigos.index_of(enemigo3)
-        barras_enemigo[i].value += -10
-        if barras_enemigo[i].value <= 0:
-            sprites.destroy(enemigo3)
-            if nivel == 2 and not (en_transicion):
-                muertes_n2 += 1
-                if muertes_n2 >= objetivo_n2:
-                    objetivo_n2 = 9999
-                    scenefive()
-sprites.on_overlap(SpriteKind.projectile, SpriteKind.enemy, on_on_overlap3)
-
+    tiles.place_on_random_tile(elon, sprites.dungeon.collectible_insignia)
 def iniciar_nivel_1():
     global nivel, rosas, rosa_actual, nena, vida_jugador
     music.play(music.create_song(hex("""
@@ -272,10 +350,10 @@ def iniciar_nivel_1():
         hud_rosas
         """))
     for index in range(3):
-        s = sprites.create(assets.image("""
+        t = sprites.create(assets.image("""
             rose
             """), SpriteKind.Rose)
-        tiles.place_on_random_tile(s, assets.tile("""
+        tiles.place_on_random_tile(t, assets.tile("""
             miMosaico
             """))
 
@@ -304,6 +382,16 @@ def crear_enemigo_tiktok():
     enemigo22.follow(nena, 25)
     enemigos.append(enemigo22)
     barras_enemigo.append(vida_enemigo2)
+
+def on_on_zero2(barra2):
+    if nena:
+        controller.move_sprite(nena, 0, 0)
+        nena.start_effect(effects.disintegrate, 500)
+    music.stop_all_sounds()
+    pause(600)
+    game.over(False, effects.melt)
+statusbars.on_zero(StatusBarKind.health, on_on_zero2)
+
 def poner_hud(img2: Image):
     global rosa_hud
     if rosa_hud:
@@ -312,10 +400,14 @@ def poner_hud(img2: Image):
     rosa_hud.set_flag(SpriteFlag.RELATIVE_TO_CAMERA, True)
     rosa_hud.z = 200
 def iniciar_nivel_2():
-    global muertes_n2, nivel, vida_jugador
+    global vida_jugador, muertes_n2, objetivo_n2, nivel
+    if vida_jugador:
+        sprites.destroy(vida_jugador)
+        vida_jugador = None
     sprites.destroy_all_sprites_of_kind(SpriteKind.enemy)
     sprites.destroy_all_sprites_of_kind(SpriteKind.projectile)
     muertes_n2 = 0
+    objetivo_n2 = 10
     music.play(music.create_song(assets.song("""
             nivel2
             """)),
@@ -487,14 +579,6 @@ def sceneOne():
     game.show_long_text("Son les 3:33 AM. El mòbil vibra una altra vegada. No recordes quan has obert TikTok… però tampoc quan l'has deixat.",
         DialogLayout.BOTTOM)
     scenetwo()
-
-def on_on_zero(vida):
-    music.stop_all_sounds()
-    game.over(False)
-    music.play(music.melody_playable(music.wawawawaa),
-        music.PlaybackMode.UNTIL_DONE)
-statusbars.on_zero(StatusBarKind.health, on_on_zero)
-
 def crear_enemigo_youtube():
     global enemigo22, vida_enemigo2
     enemigo22 = sprites.create(assets.image("""
@@ -508,31 +592,36 @@ def crear_enemigo_youtube():
     enemigo22.follow(nena, 30)
     enemigos.append(enemigo22)
     barras_enemigo.append(vida_enemigo2)
-vida_enemigo2: StatusBarSprite = None
 enemigo22: Sprite = None
-muertes_n2 = 0
-en_transicion = False
+vida_enemigo2: StatusBarSprite = None
 fondo_transicion: Sprite = None
+objetivo_n2 = 0
+muertes_n2 = 0
+i = 0
+es_elon = False
+win: Sprite = None
+en_transicion = False
 rosas = 0
 barras_enemigo: List[StatusBarSprite] = []
 enemigos: List[Sprite] = []
-invulnerable = False
+s: Sprite = None
 ultima_direccion = ""
+invulnerable_boss = False
+bala3: Sprite = None
+sy = 0
+sx = 0
+dy = 0
+dx = 0
 Play: Sprite = None
 nivel = 0
-objetivo_n2 = 0
-vida_jugador: StatusBarSprite = None
+invulnerable = False
+barra22: StatusBarSprite = None
 elon: Sprite = None
-dx = 0
-dy = 0
+vida_jugador: StatusBarSprite = None
 nena: Sprite = None
 rosa_actual: Sprite = None
 rosa_hud: Sprite = None
-# LOCAL: objetivo y boss + apuntado
-objetivo_n2 = 15
-# --------------------
-# START
-# --------------------
+invulnerable = False
 scene.set_background_image(assets.image("""
     fondo_inicio1
     """))
@@ -541,8 +630,15 @@ sceneStart()
 def on_update_interval():
     if en_transicion:
         return
+    if nena and (elon and nivel == 3):
+        torreta_dispara()
+game.on_update_interval(1000, on_update_interval)
+
+def on_update_interval2():
+    if en_transicion:
+        return
     if nena and nivel == 1:
         crear_enemigo_tiktok()
     elif nena and nivel == 2:
         crear_enemigo_youtube()
-game.on_update_interval(4000, on_update_interval)
+game.on_update_interval(4000, on_update_interval2)
