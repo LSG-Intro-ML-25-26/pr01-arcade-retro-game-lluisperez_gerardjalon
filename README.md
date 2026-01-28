@@ -49,7 +49,7 @@ L'única escletxa per avançar és reunir **tres roses** disperses pel nivell. Q
 | Imatge                                                                                                    | Descripció                                                    |
 | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | <img width="650" src="https://github.com/user-attachments/assets/53537186-a3e6-4006-b028-bfdac5008958" /> | **Editor de música de MakeCode** – Pistes utilitzades al joc. |
-| <img width="650" src="https://github.com/user-attachments/assets/9c5b6b6a-3a85-4fa8-a879-b91eb590b61f" /> | ****Loops i ambients** – BSO adaptada a cada nivell i al boss.**  |
+| <img width="650" src="https://github.com/user-attachments/assets/9c5b6b6a-3a85-4fa8-a879-b91eb590b61f" /> | **Editor de música de MakeCode** – Pistes utilitzades al joc.  |
 
 ---
 
