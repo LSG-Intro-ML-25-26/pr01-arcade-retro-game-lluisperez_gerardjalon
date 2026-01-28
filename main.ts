@@ -148,14 +148,17 @@ controller.right.onEvent(ControllerButtonEvent.Pressed, function on_right_presse
     
 })
 sprites.onDestroyed(SpriteKind.Enemy, function on_on_destroyed(enemigo2: Sprite) {
-    let j: number;
-    if (enemigos.indexOf(enemigo2) >= 0) {
-        j = enemigos.indexOf(enemigo2)
-        sprites.destroy(barras_enemigo[j])
-        barras_enemigo.removeAt(j)
-        enemigos.removeAt(j)
+    let j = enemigos.indexOf(enemigo2)
+    if (j < 0) {
+        return
     }
     
+    if (j >= 0 && j < barras_enemigo.length) {
+        sprites.destroy(barras_enemigo[j])
+        barras_enemigo.removeAt(j)
+    }
+    
+    enemigos.removeAt(j)
 })
 controller.left.onEvent(ControllerButtonEvent.Pressed, function on_left_pressed() {
     
@@ -660,12 +663,12 @@ let dx = 0
 let Play : Sprite = null
 let nivel = 0
 let invulnerable = false
-let barra22 : StatusBarSprite = null
-let elon : Sprite = null
-let vida_jugador : StatusBarSprite = null
-let nena : Sprite = null
-let rosa_actual : Sprite = null
 let rosa_hud : Sprite = null
+let rosa_actual : Sprite = null
+let nena : Sprite = null
+let vida_jugador : StatusBarSprite = null
+let elon : Sprite = null
+let barra22 : StatusBarSprite = null
 invulnerable = false
 scene.setBackgroundImage(assets.image`
     fondo_inicio1

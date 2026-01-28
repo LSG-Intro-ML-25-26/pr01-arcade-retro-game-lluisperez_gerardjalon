@@ -141,11 +141,13 @@ def on_right_pressed():
 controller.right.on_event(ControllerButtonEvent.PRESSED, on_right_pressed)
 
 def on_on_destroyed(enemigo2):
-    if enemigos.index_of(enemigo2) >= 0:
-        j = enemigos.index_of(enemigo2)
+    j = enemigos.index_of(enemigo2)
+    if j < 0:
+        return
+    if j >= 0 and j < len(barras_enemigo):
         sprites.destroy(barras_enemigo[j])
         barras_enemigo.remove_at(j)
-        enemigos.remove_at(j)
+    enemigos.remove_at(j)
 sprites.on_destroyed(SpriteKind.enemy, on_on_destroyed)
 
 def on_left_pressed():
@@ -615,12 +617,12 @@ dx = 0
 Play: Sprite = None
 nivel = 0
 invulnerable = False
-barra22: StatusBarSprite = None
-elon: Sprite = None
-vida_jugador: StatusBarSprite = None
-nena: Sprite = None
-rosa_actual: Sprite = None
 rosa_hud: Sprite = None
+rosa_actual: Sprite = None
+nena: Sprite = None
+vida_jugador: StatusBarSprite = None
+elon: Sprite = None
+barra22: StatusBarSprite = None
 invulnerable = False
 scene.set_background_image(assets.image("""
     fondo_inicio1
